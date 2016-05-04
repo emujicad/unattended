@@ -1,0 +1,405 @@
+#!/bin/bash
+#
+# UBUNTU POSTINSTALL
+# Ender Mujica
+# emujicad@gmail.com
+# Marzo 2013
+#
+#
+
+if [ -f /etc/run-ubuntu-postinstall ]
+then
+
+	PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+
+	servicio=`cat /etc/servicio`
+	capa=`cat /etc/capa`
+
+	myhostname=`hostname -s`
+	myarch=`uname -m`
+	mylocation=`cat /etc/location`
+	rebootcmd=`cat /etc/debian-postinstall-reboot`
+	#sshrestorecmd=`cat /etc/debian-postinstall-sshrestore`
+
+
+	# /sbin/ethtool -s eth0 speed 100 duplex full autoneg off
+	# /sbin/ethtool -s eth1 speed 100 duplex full autoneg off
+
+	#
+	# Ejecuto el CPUSTAT - debe ser ejecutado
+	# dos veces seguidas para actualizar correctamente
+	# la variable de snmp
+	#
+	#if [ -f /usr/local/bin/cpustat ]; then
+	#       /usr/local/bin/cpustat > /var/tmp/cpu-stat.txt
+	#       /usr/local/bin/cpustat > /var/tmp/cpu-stat.txt
+	#fi
+
+	#cp /etc/linux_logo.conf /etc/linux_logo.conf.ori
+	#sed -r -i "s/-L debian/-L ubuntu/" /etc/linux_logo.conf
+
+	if [ -f /usr/bin/linuxlogo ]; then
+		cp /etc/issue /etc/issue.ori
+		echo "" > /etc/issue
+		/usr/bin/linuxlogo -t "$myhostname $servicio $capa " >> /etc/issue
+		cp /etc/issue /etc/issue.net.ori
+		/usr/bin/linuxlogo -a -t "$myhostname $servicio $capa" > /etc/issue.net
+		echo >> /etc/issue
+	fi
+
+	echo ""
+	echo "Forzando sincronizacion con NTP"
+	/usr/sbin/service ntp stop
+	/usr/sbin/ntpdate-debian
+	/usr/sbin/service ntp start
+	echo "Listo.."
+	echo ""
+
+#	if [ -f /etc/debian-postinstall-noldap ]
+#	then
+#		ldapauthdisable=`cat /etc/debian-postinstall-noldap`
+#	else
+#		ldapauthdisable="no"
+#	fi
+
+	cp -v /etc/rsyslog.conf /etc/rsyslog.conf.ori
+	echo "*.* -/var/log/$myhostname.log" >> /etc/rsyslog.d/50-default.conf
+	echo "*.* /dev/tty6" >> /etc/rsyslog.d/50-default.conf
+	service rsyslog restart
+	nohup tail -f /var/log/postinstall-results.log|logger &
+
+	echo ""
+	echo "Ejecutando postinstall de debian"
+	echo "Servicio: $servicio"
+	echo "Capa: $capa"
+	echo "Host: $myhostname"
+	echo "Arquitectura: $myarch"
+	echo "Ubicacion: $mylocation"
+#	echo "Reiniciar luego de postinstall: $rebootcmd"
+	echo ""
+
+
+#	echo "Creando directorios para src, backups y logs"
+#	mkdir /mnt/src
+#	mkdir /mnt/backups
+#	mkdir /mnt/logs
+
+#	echo ""
+#	echo "Montando recursos del filer"
+
+#	mount -o tcp 10.128.5.64:/vol/rs27f1v02/src /mnt/src
+#	mount -o tcp 10.128.5.64:/vol/rs27f1v02/logs /mnt/logs
+#	mount -o tcp 10.128.5.64:/vol/rs27f1v02/backups /mnt/backups
+
+#	cat /mnt/src/OS/common-debian/etc/syslog.conf > /etc/syslog.conf
+#        echo "" > /var/log/$myhostname.log
+#        sed -r -i "s#/var/log/SERVERNAME.log#/var/log/$myhostname.log#" /etc/syslog.conf
+#        service sysklogd restart
+
+#	echo ""
+#	echo "Copiando configuraciones y scripts"
+	
+#	cp -v /etc/fstab /etc/fstab.BACKUP
+#	cat /mnt/src/OS/common-debian/etc/fstab.LBF >> /etc/fstab
+#	cat /mnt/src/OS/common-debian/etc/vim/vimrc > /etc/vim/vimrc
+#	cat /mnt/src/OS/common-debian/etc/skel/.bashrc > /etc/skel/.bashrc
+#	cat /mnt/src/OS/common-debian/etc/ntp.conf > /etc/ntp.conf
+#	cat /mnt/src/OS/common-debian/etc/sysctl.conf > /etc/sysctl.conf
+#	cat /mnt/src/OS/common-debian/etc/hosts > /etc/hosts
+#	cat /mnt/src/OS/common-debian/etc/default/ntpdate > /etc/default/ntpdate
+#	cat /mnt/src/OS/common-debian/etc/default/portmap > /etc/default/portmap
+#	cat /mnt/src/OS/common-debian/etc/default/nfs-common > /etc/default/nfs-common
+#	cp -v /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.BACKUP
+#	cp -v /mnt/src/OS/common-debian/etc/rc.local /etc/rc.local.final
+#	chmod 755 /etc/rc.local.final
+#	cp -v /mnt/src/OS/common-debian/usr/local/bin/* /usr/local/bin/
+#	cp -v /mnt/src/OS/common-debian/etc/cron.d/* /etc/cron.d/
+#	cat /mnt/src/OS/common-debian/etc/snmp/snmpd.conf > /etc/snmp/snmpd.conf
+	
+#	case $ldapauthdisable in
+#	yes)
+#		cp -v /mnt/src/OS/common-debian/etc/sudoers.d/cantv-sudoers /etc/sudoers.d/
+#		chmod 0440 /etc/sudoers.d/cantv-sudoers
+#		;;
+#	no)
+#		echo "LDAP AUTH Activo - no se copia el cantv-sudoers"
+#		;;
+#	esac
+
+#	sync
+#	echo ""
+#	echo "Copiando scripts de cacti a /usr/local/share/varmonitor"
+#	mkdir -p /usr/local/share/varmonitor
+#	cp -R /mnt/src/OS/common-debian/usr/local/share/varmonitor/* /usr/local/share/varmonitor/
+#	sync
+#	sleep 5
+#	sync
+	
+
+#	extrasoftware='
+#		unzip
+#	'
+
+#	echo ""
+#	echo "Instalando softwtare extra via apt-get"
+
+#	for i in $extrasoftware
+#	do
+#		echo "Instalando $i"
+#		apt-get -y install $i
+#		echo "$i instalado"
+#	done
+
+#	echo "Personalizando perfiles de bash"
+#	echo ""
+
+#	echo "export EDITOR=vim" >> /etc/bash.bashrc
+#	echo "alias cp=\"cp -i\"" >> /etc/bash.bashrc
+#	echo "alias mv=\"mv -i\"" >> /etc/bash.bashrc
+#	echo "alias rm=\"rm -i\"" >> /etc/bash.bashrc
+#	echo "alias ls=\"ls --color=auto -F\"" >> /etc/bash.bashrc
+#	echo "alias mc=\"mc -a\"" >> /etc/bash.bashrc
+
+#	echo "Instalando Cliente Oracle"
+#	echo ""
+
+#	echo "" >> /var/log/postinstall-oracle-client.log
+#	cd /mnt/src/OS/common-debian/software/client-oracle
+#	nohup tail -f /var/log/postinstall-oracle-client.log|logger &
+#	./oracle-install-debian.sh 2>&1 | cat >> /var/log/postinstall-oracle-client.log
+
+#	echo ""
+#	echo "Instalando librerias de PERL"
+#	echo ""
+#	echo "" >> /var/log/postinstall-perl-libs.log
+#	nohup tail -f /var/log/postinstall-perl-libs.log|logger &
+#	cd /mnt/src/OS/common-debian/software/perl-debian
+#	./perl-debian-install.sh 2>&1 | cat >> /var/log/postinstall-perl-libs.log
+
+#	echo ""
+#	echo "Instalando version de cpustat para debian con IOWait"
+#	# cd /mnt/src/OS/common-debian/software/cpustat-debian6
+#	# tar -xzvf cpustat.tar.gz -C /usr/local/src/
+#	# cd /usr/local/src/cpustat
+#	# make clean
+#	# make
+#	# make install
+#	# cd /
+#	# rm -fR /usr/local/src/cpustat
+#	# NOTA: A partir de Julio 12, 2012 se usa la version basada en mpstat
+#	cp -v /mnt/src/OS/common-debian/software/cpustat-debian6/mpstat-based/cpustat /usr/local/bin/
+#	chmod a+x /usr/local/bin/cpustat
+
+#	echo ""
+#	echo "Arreglando el SSHD (solo CHA y BTO)"
+#	cp -v /etc/ssh/sshd_config /etc/ssh/sshd_config_BACKUP_ORIGINAL
+#	echo ""
+#	case $mylocation in
+#	cha)
+#		echo "Modificado SSHD para chacao"
+#		MGMT_IP=`/sbin/ifconfig | grep '10\.128\.' | cut -d: -f 2 | cut -d' ' -f 1`
+#
+#		if [ -z "$MGMT_IP" ]
+#		then
+#			MGMT_IP=`ifconfig eth0|grep "inet addr"|cut -d: -f2|awk '{print $1}'`
+#		fi
+#
+#		sed -r -i "s/Protocol 2/Protocol 2,1\nListenAddress $MGMT_IP/" /etc/ssh/sshd_config
+#		echo "$MGMT_IP $myhostname" >> /etc/hosts
+#		;;
+#	bto)
+#		echo "Modificando SSHD para Barquisimeto"
+#		MGMT_IP=`/sbin/ifconfig | grep '10\.71\.' | cut -d: -f 2 | cut -d' ' -f 1`
+
+#                if [ -z "$MGMT_IP" ]
+#                then
+#                        MGMT_IP=`ifconfig eth0|grep "inet addr"|cut -d: -f2|awk '{print $1}'`
+#                fi
+#		
+#		sed -r -i "s/Protocol 2/Protocol 2,1\nListenAddress $MGMT_IP/" /etc/ssh/sshd_config
+#		echo "$MGMT_IP $myhostname" >> /etc/hosts
+#		;;
+#	*)
+#		echo "Modificando SSHD para locacion no identificada..."
+#		echo "usando eth0 como fuente de IP de administracion"
+#		# No es ni CHA ni BTO .. asumimos eth0 como ADMIN y obtenemos la IP
+#		#
+#		MGMT_IP=`ifconfig eth0|grep "inet addr"|cut -d: -f2|awk '{print $1}'`
+#		sed -r -i "s/Protocol 2/Protocol 2,1\nListenAddress $MGMT_IP/" /etc/ssh/sshd_config
+#		echo "$MGMT_IP $myhostname" >> /etc/hosts
+#		;;
+#	esac
+
+#	echo ""
+#	echo "Regenerando clave para protocolo V 1"
+#	ssh-keygen -t rsa1 -f /etc/ssh/ssh_host_rsa1_key -N ""
+#	echo "HostKey /etc/ssh/ssh_host_rsa1_key" >> /etc/ssh/sshd_config
+
+#        echo ""
+#        echo "Creando Usuarios del servidor"
+#        echo ""
+
+#	case $ldapauthdisable in
+#	yes)
+#        	/mnt/src/OS/basic_scripts_debian/create.users.sh
+#		;;
+#	no)
+#		# /mnt/src/OS/basic_scripts_debian/create.users.sh
+#		apt-get -y install debconf-utils
+#		debconf-set-selections /mnt/src/OS/debian-auth-ldap/preseed/seed.pam-ldap
+#		apt-get -y install ldap-utils libpam-ldap libnss-ldap nscd sudo-ldap
+#		pam-auth-update --force --remove winbind
+#		cp -vR /mnt/src/OS/debian-auth-ldap/etc/* /etc/
+#		echo "session     required      pam_mkhomedir.so skel=/etc/skel umask=077 silent" >> /etc/pam.d/common-session
+#		chmod 600 /etc/*ldap.secret
+#		mkdir -p /var/users
+#		echo "UseLogin yes" >> /etc/ssh/sshd_config
+#		cat /mnt/src/OS/pam-security-common/access.extra >> /etc/security/access.conf
+#		echo "account    required     pam_access.so" >> /etc/pam.d/sshd
+#		echo "account    required     pam_access.so" >> /etc/pam.d/login
+#		;;
+#	esac
+
+#        echo ""
+#        echo "Instalando xinetd y sendmail-bin"
+
+#        apt-get -y install xinetd
+#        apt-get -y install sendmail-bin
+
+
+#	echo ""
+#	echo "Bajando servicios innecesarios"
+
+#	svclistoff='
+#		samba
+#		exim4
+#		openbsd-inetd
+#		winbind
+#		rsyslog
+#		xinetd
+#		arpwatch
+#		nfs-kernel-server
+#	'
+
+#	for i in $svclistoff
+#	do
+#		chkconfig $i off
+#	done
+
+#	echo "Reconfigurando SENDMAIL"
+
+#	cp -v /mnt/src/OS/common-debian/etc/mail/sendmail.mc /etc/mail/
+#	make -C /etc/mail
+#	/usr/bin/m4 /etc/mail/sendmail.mc > /etc/mail/sendmail.cf
+
+
+#	echo ""
+#	echo "Colocando servicios primarios en autostart"
+#	
+#	svcliston='
+#		sysklogd
+#		klogd
+#		ssh
+#		cron
+#		sysstat
+#		portmap
+#		fam
+#		nfs-common
+#		quotarpc
+#		rc.local
+#		sudo
+#		gpm
+#		snmpd
+#		ntp
+#		sendmail
+#	'
+
+#	
+#	for i in $svcliston
+#	do
+#		chkconfig $i on
+#	done
+
+#	echo ""
+#	echo "Eliminando arpwatch"
+#	apt-get -y remove arpwatch
+
+#	echo ""
+#	echo "Aplicando variables de entorno para NET-SNMP"
+#	# apt-get -y install snmp-mibs-downloader
+
+#	echo "export MIBS=ALL" >> /etc/bash.bashrc
+
+#	echo ""
+#	echo "Eliminando rotacion de logs de DEBIAN (se usara la de sopmid)"
+#	rm /etc/cron.daily/sysklogd
+
+#	echo ""
+#	case $sshrestorecmd in
+#	yes|YES)
+#		echo "Restaurando config de SSH"
+
+#		ARCHIVOS=`ls -l /mnt/backups/ssh/$servicio/$capa/$myhostname*-ssh.tgz`
+
+#		BACKUPS=$?
+
+#		if [ "$BACKUPS" == "0" ]; then
+#			echo "Respaldos ubicados: Restaurando config y claves SSH para el servidor"
+#                        ULTIMA_SSH=`find /mnt/backups/ssh/$servicio/$capa/ -name "$myhostname*" | sort | tail -1`
+#                        for file in $ULTIMA_SSH
+#                        do
+#                                echo "Restaurando archivo $file"
+#                                tar -zxvf $file -C /
+#                        done
+#		fi
+#		
+#		;;
+#	*)
+#		echo "No se restaura la config de SSH"
+#		;;
+#	esac
+
+#	echo ""
+#	
+
+#	echo ""
+#	echo "Postinstall finalizado (fase 1)"
+#	echo ""
+
+
+	echo "Restituyendo RC.LOCAL de produccion previo al"
+	echo "postinstall de la aplicacion"
+	mv /etc/rc.local /etc/rc.local.postinstall
+	mv /etc/rc.local.ori /etc/rc.local
+	chmod 755 /etc/rc.local
+
+#	if [ -f /mnt/src/OS/postinstall/DEBIAN6/apps/$servicio/$capa.sh ]
+#	then
+#		echo "Ejecutando postinstall fase 2 (aplicacion: $servicio / $capa)"
+#		echo ""
+#		echo "" >> /var/log/postinstall-$servicio-$capa.log
+#		nohup tail -f /var/log/postinstall-$servicio-$capa.log|logger &
+#		exec /mnt/src/OS/postinstall/DEBIAN6/apps/$servicio/$capa.sh 2>&1 | cat >> /var/log/postinstall-$servicio-$capa.log
+#		echo ""
+#		echo "Postinstall para $servicio/$capa Finalizado"
+#		echo ""
+#	fi
+#	
+#	rm $controlfile
+
+#	case $rebootcmd in
+#	"yes"|"YES")
+#		echo "no" > /etc/debian-postinstall-reboot
+#		echo ""
+#		echo "Reiniciando servidor"
+#		echo ""
+#		sync
+#		sleep 5
+#		sync
+#		sleep 5
+#		reboot
+#		exit 0
+#		;;
+#	esac
+
+fi

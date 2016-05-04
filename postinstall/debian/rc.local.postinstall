@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# NOTA: Esta version elimina el -e al final de bin sh
+# Luego el postinstall restituye el rc.local normal
+#
+# RC Local modificado para ubuntu por
+# Ender Mujica.
+# emujicad@gmail.com
+# Marzo 2013
+#
+
+if [ -f /etc/run-ubuntu-postinstall ]; then
+	echo ""
+	echo "****************************************************"
+	echo "****************************************************"
+	echo "** EJECUTANDO POSTINSTALL PARA UBUNTU **************"
+	echo "** El proceso puede tardar algunos minutos *********"
+	echo "** Espere a que termine y el servidor se reinicie **"
+	echo "** solo o devuelva un prompt !!! *******************"
+	echo "****************************************************"
+	echo "****************************************************"
+	echo ""
+
+	/etc/postinstall-ubuntu.sh 2>&1 | cat >> /var/log/postinstall-results.log
+fi
+
+exit 0

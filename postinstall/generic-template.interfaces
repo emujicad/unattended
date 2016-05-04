@@ -1,0 +1,67 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+# Interfaz de red PRIVADA - mgmt
+allow-hotplug eth0
+iface eth0 inet static
+	address 10.128.5.200
+	netmask 255.255.128.0
+	network 10.128.0.0
+	broadcast 10.128.127.255
+	# gateway 10.128.0.1
+	# dns-* options are implemented by the resolvconf package, if installed
+	# NOTA: No se requiere colocar informacion de DNS porque ya la plantilla
+	# 	lo coloca en /etc/resolv.conf
+	# dns-nameservers 10.128.1.28 10.128.1.33
+	#
+	# descomentar las rutas estaticas segun sea necesario. Aparecen para chacao
+	# y para barquisimeto
+	#
+	# Rutas estaticas CHACAO - descomentar si es un servidor de chacao en
+	# la red 10.128.0.0/17
+	# up route add -net 10.120.48.0 netmask 255.255.240.0 gw 10.128.0.1
+	# up route add -net 10.71.32.0 netmask 255.255.254.0 gw 10.128.0.1
+	# up route add -net 10.120.8.0 netmask 255.255.252.0 gw 10.128.0.1
+	# up route add -net 10.128.136.0 netmask 255.255.255.0 gw 10.128.0.1
+	# up route add -host 200.44.32.130 gw 10.128.0.1
+	#
+	# Rutas estaticas BTO - descomentar si es un servidor de bto.
+	# 
+	# up route add -net 10.128.0.0 netmask 255.255.128.0 gw 10.71.32.1
+	# up route add -net 10.120.48.0 netmask 255.255.240.0 gw 10.71.32.1
+	# up route add -net 10.120.190.0 netmask 255.255.254.0 gw 10.71.32.1
+	# up route add -net 10.120.8.0 netmask 255.255.252.0 gw 10.71.32.1
+	# up route add -net 200.44.46.0 netmask 255.255.255.0 gw 10.71.32.1
+	# up route add -net 161.196.42.0 netmask 255.255.255.0 gw 10.71.32.1
+	# up route add -host 200.44.32.130 gw 10.71.32.1
+	#
+	# Rutas estaticas CHACAO-HOSTING - descomentar si es un servidor de chacao
+	# en la red 10.128.136.0/24
+	#
+	# up route add -net 10.120.48.0 netmask 255.255.240.0 gw 10.128.136.1
+	# up route add -net 10.71.32.0 netmask 255.255.254.0 gw 10.128.136.1
+	# up route add -net 10.128.0.0 netmask 255.255.128.0 gw 10.128.136.1
+	# up route add -host 200.44.32.130 gw 10.128.136.1
+
+
+# The secondary network interface
+allow-hotplug eth1
+iface eth1 inet static
+        address 200.44.32.200
+        netmask 255.255.255.0
+        network 200.44.32.0
+        broadcast 200.44.32.255
+	gateway 200.44.32.1
+        # dns-* options are implemented by the resolvconf package, if installed
+	# NOTA: No se requiere colocar informacion de DNS porque ya la plantilla
+	# 	lo coloca en /etc/resolv.conf
+        # dns-nameservers 10.128.1.28 10.128.1.33
+
+
+
+

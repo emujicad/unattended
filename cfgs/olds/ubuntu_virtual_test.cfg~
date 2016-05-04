@@ -1,0 +1,581 @@
+##############################################################################
+# Contenido del archivo de pre-configuracion (para debian 6 -squeeze)
+#
+# Personalizada para servidores de Equipos con DEBIAN 6
+#
+# Adaptada para servidores UBUNTU 12.04 por Ender Mujica emujicad@gmail.com.
+# Febrero 2013
+# Tomado del original elaborado por Reynaldo Martinez P. rmarti05@cantv.com.ve
+# para debian Junio/Julio 2011.
+#
+# Mayor informacion en 	https://help.ubuntu.com/12.04/installation-guide/i386/preseed-intro.html
+#			https://help.ubuntu.com/12.04/installation-guide/amd64/preseed-intro.html
+#			https://help.ubuntu.com/12.04/installation-guide/example-preseed.txt
+#
+###############################################################################
+#
+# Usar la plantilla de la siguiente manera:
+#
+# 1.- 	Arrancar el servidor con un CD Alternative de Ubuntu 12.04.
+#	La plantilla sirve para arquitecturas i386 y x64.
+#
+# 2.-	Una vez que el CD de Ubuntu pida el modo de instalacion, presionar la
+#	tecla ESCAPE (ESC) una o dos veces hasta que salga el prompt basico.
+#
+# 3.-	En el prompt basico colocar lo siguiente:
+#
+#	Si va a fijar la direccion IP de forma manual usar cuando el instalador
+#	le pregunte:
+#
+#	auto netcfg/disable_dhcp=true url=http://IP_SERVIDOR_DE_CONF/cfgs/DEBIAN6/TEMPLATES/template.cfg
+#	Ej:
+#	auto netcfg/disable_dhcp=true url=http://192.168.1.112/cfgs/DEBIAN6/TEMPLATES/template.cfg
+#
+#	Si va a fijar la direccion IP via un servidor DHCP en su red
+#
+#	auto url=http://IP_SERVIDOR_DE_CONF/cfgs/UBUNTU12.04/TEMPLATES/template.cfg
+#	Ej:
+#	auto url=http://192.168.1.112/cfgs/UBUNTU12.04/TEMPLATES/template.cfg
+#
+# 4.-	Al presionar ENTER el instalador de DEBIAN pedira seleccionar la tarjeta
+#	de red desde donde se hara la instalacion, y luego pedira los datos de
+#	la interfaz (direccion IP, netmask, gateway y dns). De ahi en adelante,
+#	si la plantilla es leida, la instalacion se realiza de manera
+#	automatica.
+#	En caso que los discos esten sin formato, el instalador preguntara, una
+#	sola vez, si se desean inicializar los discos. Esta plantilla ya posee
+#	incluido un esquema de particiones. Si lo requiere puede modificarlo.
+#
+# 5.-	La instalacion desatendida se realiza en dos fases. La primera fase la
+#	ejecuta el "pressed" (debian installer) durante la ejecucion del mismo.
+#	La segunda fase o "postinstall" se realiza luego del primer "reboot".
+#
+#	Luego de culminar la segunda fase, y dependiendo de algunas selecciones
+#	en esta plantilla, el servidor devuelve el prompt de login o se reinica
+#	de manera automatica para dar el prompt de login
+#
+#	En la fase 1 (preseed con debian installer) se crean los lvm's y
+#	particiones segun lo definido, se instalan todos los paquetes de uso
+#	comun para un servidor y se crea el usuario de root con su password.
+#
+#	En la fase 2 se realizan las siguientes labores tal como lo hace el
+#	postinstall de CENTOS/RHEL:
+#	a.- Se instalan paquetes adicionales como sysklogd/klogd, xinetd, etc.
+#	b.- Se instalan las librerias de PERL si se requiere.
+#	c.- Se instala el cliente oracle si se requeire.
+#	d.- Se instalan todos los scripts de respaldo y crontab generales para
+#	rotacion de logs, etc.
+#	e.- Se instala version de CPUSTAT con soporte de variable "Waiting for I/O".
+#	f.- Se crean los usuarios administadores con sus passwords.
+#	g.- Se realizan los cierres de seguridad y se dejan en "stop" los
+#	    servicios no necesarios.
+#
+#	En todo sentido practico la plantilla base de DEBIAN6 hace lo mismo que
+#	la definida para CENTOSx.
+#
+#	A continuacion se detalla cada seccion. Muchas secciones permanecen
+#	intencionalmente comentadas porque no se usan en esta instalacion,
+#	sin embargo, se dejan como referencia !.
+#
+# 6.- 	Si modifica la plantilla debe validar que la misma este correcta con
+#	el siguiente comando en otra maquina ubuntu
+##############################################################################
+# CONFIGURACION PARA IDIOMA Y PAIS.
+##############################################################################
+#
+# d-i debian-installer/locale string en_US
+#
+# En esta seccion se preconfiguran los valores de forma individual para una mayor
+# flexiblidad por eso se comenta el anterior
+d-i debian-installer/language string en
+d-i debian-installer/country string VE
+d-i debian-installer/locale string en_US.UTF-8
+#
+##############################################################################
+# CONFIGURACION DEL TECLADO.
+##############################################################################
+#
+#
+# Esta seccion controla la seleccion de teclado. Se usa "la-latin" pero se deja
+# comentada la opciones para "us"" y "es"
+
+# Deshabilita la detección automatica (interactive) del mapa del teclado.
+d-i console-setup/ask_detect boolean false
+# Teclado latinoamericano
+d-i keyboard-configuration/layoutcode string la-latin
+# Teclado en Ingles-US
+#d-i keyboard-configuration/layoutcode string us
+# Para omitir la configuración del teclado descomente la siguiente linea y
+# comente las anteriores. Esto hará que el mapa de teclado del nucleo permanezca
+inactivo.
+#keyboard-configuration/modelcode skip
+
+##############################################################################
+# INFORMACION DE RED
+##############################################################################
+#
+# Como la instalacion pide la informacion de la interfaz "ethx" desde el inicio
+# y al final usa el archivo de interfaces que es parte de la plantilla, la
+# seccion de red a continuacion no hace nada por lo tanto queda completamente
+# comentada. Se deja solo como referencia!.
+#
+# Seleccion de la Interfaz de Red
+# Si se selecciona la siguiente opcion se deshabilitar completamente la
+# configuracion de red.Es util para instalaciones desde cdrom o dispositivos
+# que no estan en red, para los cuales las preguntas y advertencias de red asi
+# como los tiempos de espera serian molestos.
+#d-i netcfg/enable boolean false
+#
+# Se secciona para que netcfg escoga de forma automatica una interfaz. Esto
+# hace que no muestre la lista si hay mas de uno.
+#d-i netcfg/choose_interface select auto
+#
+# Esto selecciones una interfaz especifica en lugar de encontrarla
+#d-i netcfg/choose_interface select eth0
+#
+# Si tiene un servidor de DHCP lento y el instalador expira intentando
+# conectarse a el, esto puede serle util
+#d-i netcfg/dhcp_timeout string 60
+#
+# Si prefiere puede configurar la red manualmente descomentando esta linea
+# y las lineas de configuracion estatica de red a continuacion.
+#d-i netcfg/disable_dhcp boolean true
+#
+# Si quiere que el fichero de preconfiguracion funcione tanto en
+# sistemas con un servidor de DHCP como en los que no lo tengan, tendra
+# que descomentar estas lineas y añadir la configuracion estatica de red
+# a continuacion.
+#d-i netcfg/dhcp_failed note
+#d-i netcfg/dhcp_options select Configure network manually
+#
+# Configuracion estatica de red
+#d-i netcfg/get_nameservers string 208.67.222.222,208.67.222.220
+#d-i netcfg/get_ipaddress string 192.168.1.200
+#d-i netcfg/get_netmask string 255.255.255.0
+#d-i netcfg/get_gateway string 192.168.1.1
+#d-i netcfg/confirm_static boolean true
+#
+# Cualquier nombre de host y de dominio que se obtengan por DHCP se utilizan
+# antes que los valores aqui definidos. Sin embargo, definir los valores evita
+# que la pregunta se muestre aunque los valores vengan del DHCP.
+# d-i netcfg/get_hostname string unassigned-hostname
+# d-i netcfg/get_domain string unassigned-domain
+# Ejemplo:
+# d-i netcfg/get_hostname string test-04
+# d-i netcfg/get_domain string domain.bogus
+#
+# Esta linea debe quedar siempre descomentada.
+# Deshabilitar el molesto mensaje sobre la clave WEP
+d-i netcfg/wireless_wep string
+#
+##############################################################################
+# FIRMWARE DE RED
+##############################################################################
+#
+# Si se requiere firmware no libre para la red o para otro dispositivo, puede
+# configurar el instalador para que siempre intente cargarlo, sin preguntar. O
+# cambiar a falso para inhibir la pregunta.
+#
+#d-i hw-detect/load_firmware boolean true
+#
+# Normalmente esta linea no hace falta. En todo caso, se puede descomentar y/o
+# incluir en el prompt de instalacion como hw-detect/load_firmware=true
+#
+##############################################################################
+# SERVIDOR SSH PARA LA INSTALACION REMOTA
+##############################################################################
+#
+# Use los siguientes parametros si desea hacer uso del componente
+# network-console (consola de red) para instalaciones remotas via SSH.
+# Solo tiene sentido si desea hacer el resto de la instalacion
+# manualmente. Es decir, si se requiere entrar al servidor, via SSH,
+# en plena instalacion se pueden descomentar las 3 lineas siguientes.
+# Cambie el password r00tme por algo mas seguro.
+#
+#d-i anna/choose_modules string network-console
+#d-i network-console/password password r00tme
+#d-i network-console/password-again password r00tme
+#
+##############################################################################
+# MIRROR DE INSTALACION !!
+##############################################################################
+#
+# Actualmente no contamos con un servidor "MIRROR" de ubuntu en CANTV que
+# incluye tanto los paquetes originales como las actualizaciones de seguridad.
+# No tiene que definir la cadena mirror/country si selecciona ftp
+# Se recomienda ampliamente dejar la instalacion via HTTP.
+#
+d-i mirror/protocol string http
+#d-i mirror/protocol string ftp
+d-i mirror/country string manual
+d-i mirror/http/hostname string ve.archive.ubuntu.com
+#d-i mirror/http/hostname string ubuntu.cantv.net
+d-i mirror/http/directory string /ubuntu
+d-i mirror/http/proxy string
+#
+# Publicación a instalar.
+#d-i mirror/suite string precise
+# Publicación a usar para descargar componentes de la instalación (opcional).
+#d-i mirror/udeb/suite string precise
+# Componentes a usar para cargar componentes del instalador (opcional).
+#d-i mirror/udeb/components multiselect main, restricted
+#
+##############################################################################
+# CREACION DE USUARIOS
+##############################################################################
+#
+# Aqui desactivamos la creacion del usuario normal
+#
+# Solo root es creado en la instalacion y luego via postinstall
+# se pueden crear el resto de los usuarios
+#
+# No se crea una cuenta de usuario normal. Se puede hacer via postinstall
+#
+d-i passwd/make-user boolean false
+#
+# Creamos el usuario ROOT con su password. Se puede colocar el
+# password como un HASH-MD5 tal como sale en el /etc/shadow.
+#
+d-i passwd/root-password password P@ssw0rd
+d-i passwd/root-password-again password P@ssw0rd
+# La siguiente linea se para colocar una contraseña en formato MD5
+# que hace mas dificil conocerla, sin embaergo, si se tiene acceso a
+# este archivo de configuracion se podria llevar un ataque de fuerza bruta
+# para intentar descubrirla.
+# Si se va a utilizar la opcion MD5 se deben comentar las dos
+# lineas que colocan el password "p@ssw0rd".
+#
+# d-i passwd/root-password-crypted password [MD5 hash]
+#
+##############################################################################
+# RELOJ Y ZONA HORARIA
+##############################################################################
+#
+# Controla si el reloj del sistema debe establecerse a UTC.
+# En Venezuela no se usa UTC por lo que se coloca en false.
+d-i clock-setup/utc boolean false
+#
+# Selecciona la zona horaria
+d-i time/zone string America/Caracas
+#
+# Selecciona si se usa NTP para configurar el reloj durante la instalacion
+d-i clock-setup/ntp boolean true
+# Servidor NTP a usar.
+d-i clock-setup/ntp-server string 0.south-america.pool.ntp.org
+#
+##############################################################################
+# PARTICIONADO DE DISCO PRINCIPAL
+##############################################################################
+#
+# El nombre del dispositivo se debe especificar en formato tradicional no devfs
+# en el caso de tener más de un disco. Debe especificar un disco, a menos que
+# el sistema tenga uno solo.
+#
+# Por ejemplo, para usar el primer disco SCSI/SATA:
+#Para una maquina real se debe usar: /dev/sda
+#Para una maquina virtual con kvm se debe usar /dev/vda
+#
+d-i partman-auto/disk string /dev/vda
+#
+# Se especificar el método de particionamiento a utilizar.
+# Los métodos disponibles actualmente son:
+# - regular: usa el tipo de partición habitual para su arquitectura
+# - lvm:     usa LVM para particionar el disco
+# - crypto:  usa LVM dentro de una partición cifrada
+# Se usa LVM
+#
+d-i partman-auto/method string lvm
+#
+# Si alguno de los discos que va a ser automaticamente particionado
+# contiene una configuración antigua de LVM, se le presentara un
+# aviso al usuario. Puede preconfigurarse para que no aparezca:
+#
+d-i partman-lvm/device_remove_lvm boolean true
+#
+# De la misma forma para «arrays» RAID por software preexistentes:
+#
+d-i partman-md/device_remove_md boolean true
+#
+# Y lo mismo pasa con la confirmación para escribir las particiones
+# lvm.
+#
+d-i partman-lvm/confirm boolean true
+#
+# Puede elegir cualquiera de las tres recetas de particionado
+# predefinidas:
+# - atomic: todos los ficheros en una partición
+# - home:   separa la partición /home
+# - multi:  separar las particiones /home, /usr, /var y /tmp
+#
+# Ejemplo
+#d-i partman-auto/choose_recipe select atomic
+#
+# Sin embargo, aqui colocamos una receta para el esquema customizado de
+# nuestro servidor!
+# /boot va a ser particion EXT4 normal, booteable y primaria con
+# un minimo de 128 y un maximo de 250 mb's.
+# Luego se crea un LVM en EXT4 para el resto del disco
+# Dentro del LVM se crean:
+#	/ con un minimo de 1024 y un max de 4096 MB's.
+#	SWAP con un minimo de 1024 y un max de 4096 MB's
+#	/usr con un minimo de 3072 y un max de 5120 MB's
+#	/var con lo que queda del espacio LVM
+#
+# NOTA: Mucho cuidado de no omitir el "."
+#	al final de cada seccion de particion o no funcionara!!!
+#
+# - Formato Normal y LVM
+#
+d-i partman-auto/expert_recipe string				\
+	conf-filesystem ::					\
+		128 192 256 ext4				\
+			$primary{ } $bootable { }		\
+			method{ format } format{ }		\
+			use_filesystem{ } filesystem{ ext4 }	\
+			mountpoint{ /boot }			\
+		.						\
+		1024 1280 -1 ext4				\
+			$defaultignore{ }			\
+			method{ lvm }				\
+			vg_name{ vg00 }				\
+		.						\
+		1024 2048 4096 linux-swap			\
+			$lvmok{ }				\
+			in_vg{ vg00 }				\
+			method{ swap }				\
+			format{ }				\
+		.						\
+		1024 2048 4096 ext4				\
+			$lvmok{ }				\
+			in_vg{ vg00 }				\
+			method{ format } format{ }		\
+			use_filesystem{ } filesystem{ ext4 }	\
+			mountpoint{ / }				\
+		.						\
+		3072 4096 5120 ext4				\
+			$lvmok{ }				\
+			in_vg{ vg00 }				\
+			method{ format } format{ }		\
+			use_filesystem{ } filesystem{ ext4 }	\
+			mountpoint{ /usr }			\
+		.						\
+		512 1024 1536 ext4				\
+			$lvmok{ }				\
+			in_vg{ vg00 }				\
+			method{ format } format{ }		\
+			use_filesystem{ } filesystem{ ext4 }	\
+			mountpoint{ /home }			\
+		.						\
+		500 600 -1 ext4					\
+			$lvmok{ }				\
+			in_vg{ vg00 }				\
+			method{ format } format{ }		\
+			use_filesystem{ } filesystem{ ext4 }	\
+			mountpoint{ /var }			\
+		.
+#
+# Fin esquema customizado con LVM
+#
+# Confirmamos que todo esta OK:
+#
+# La siguiente hace que «partman» particione automaticamente el
+# espacio sin confirmacion, en caso de que usted haya indicado que hacer
+# mediante uno de los metodos mencionados anteriormente.
+#
+#d-i partman-md/confirm boolean true
+
+
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+#
+###############################################################################
+# CONFIGURACION DE APT
+###############################################################################
+#
+# Aqui definimos el MIRROR para los "security updates".
+# La instalacion se trae todo el contenido primario del mirror
+# definido inicialmente, pero si hay paquetes con updates se los
+# baja de este mirror.
+#
+# Puede elegir instalar software de restricted, universe o backport
+#
+#d-i apt-setup/restricted boolean true
+#d-i apt-setup/universe boolean true
+#d-i apt-setup/backports boolean true
+
+# Descomente lo siguiente si no quiere usar una réplica en red.
+#d-i apt-setup/use_mirror boolean false
+
+#
+# Seleccione que servicios de actualizacion que desea usar.
+# En este caso:seguridad
+#
+d-i apt-setup/services-select multiselect security
+d-i apt-setup/security_host string security.ubuntu.com
+d-i apt-setup/security_path string /ubuntu
+#
+# Define los mirror de red de seguridad a usar.
+#
+# d-i apt-setup/security_host string ubuntu.cantv.net/debian-security/
+#
+#
+# Repositorio adicional. Disponibles local[0-9]
+d-i apt-setup/local0/repository string \
+       deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
+d-i apt-setup/local0/comment string local server
+#
+###############################################################################
+# SELECCION DE PAQUETES A INSTALAR
+###############################################################################
+#
+# En las secciones a continuacion se colocan los meta grupos de paquetes
+# y luego los paquetes individuales a instalar.
+#
+# Seleccion BASE para nuestros servidores del ISP.
+# Las otras selecciones se dejan solo como referencia
+#
+tasksel tasksel/first multiselect standard, File server, SSH server
+#
+# Paquetes individuales
+#
+d-i pkgsel/include string \
+	openssh-server \
+	build-essential \
+	vim \
+	ntp \
+	ntpdate \
+	automake \
+	sudo \
+	expect \
+	dstat \
+	fam \
+	hdparm \
+	iotop \
+	nfswatch \
+	quota \
+	quotatool \
+	sysklogd \
+	sysstat \
+	lynx \
+	gamin \
+	lslk \
+	arpwatch \
+	iptraf \
+	tcpdump \
+	iptables \
+	libpcre3-dev \
+	libtool \
+	libltdl-dev \
+	iftop \
+	saidar \
+	sendmail-cf \
+	sendmail-base \
+	ldap-utils \
+	dnstop \
+	ethtool \
+	mii-diag \
+	nmap \
+	snmp \
+	snmpd \
+	nmon \
+	gpm \
+	linuxlogo \
+	mc \
+	perl-suid \
+	htop \
+	pydf \
+	netcat \
+	acct \
+	libpam-cracklib \
+	rsync \
+	iputils-arping \
+	sysstat \
+	nmon \
+	curl \
+	ubuntu-cloud-keyring
+
+# En caso de querer hacer actualizacion de paquetes despues
+# de debootstrap.
+# Valores posibles: none, safe-upgrade, full-upgrade
+#
+d-i pkgsel/upgrade select full-upgrade
+#
+# Polica para aplicar actulizaciones de seguiridad:
+# 	"none" (no hay actualizaciones automaticas)
+# 	"unattended-upgrades" (instala actualizaciones de seguridad automaticamente)
+# 	"landscape" (Gestiona el systema con Landscape).
+d-i pkgsel/update-policy select unattended-upgrades
+#
+# Algunas versiones del instalador pueden informar de las versiones
+# de programas que tiene instalados y los programas que utiliza.
+# Por omision, no se envia ningun informe, pero estos informes
+# ayudan al proyecto a determinar que programas son mas populares
+# y que se deben incluir en los CD
+# Se desctiva el popularity contest.. no lo necesitamos y no lo queremos!
+#
+popularity-contest popularity-contest/participate boolean false
+#
+###############################################################################
+# INSTALACION DEL BOOTLOADER
+###############################################################################
+# GRUB 2 es ahora el cargador del SO por defecto. Si se necesita el GRUB Legado
+# por alguna razon en particular entonces descomente esta linea:
+#
+#d-i grub-installer/grub2_instead_of_grub_legacy boolean false
+#
+###############################################################################
+# FINALIZAR LA INSTALACION
+###############################################################################
+#
+# Normalmente, queremos que nos salga el mensaje de "instalacion finalizada"
+# del preseed para poder quitar el cd/dvd y seguir con la fase 2...
+# Si se descomenta la siguiente linea se cambia este comportamiento y
+# luego de la FASE 1 (preseed) el servidor reinicia !!.
+#
+# Por defecto se puede dejar comentada !.
+# Con ello se omitir el mensaje final sobre la finalizacion de la instalacion.
+#
+#d-i finish-install/reboot_in_progress note
+#
+# Ejeccion del CD/DVD luego de la fase 1 de la instalacion.
+#
+# Esta linea controla si se ejecta el CD/DVD o no. Por defecto esta comentada
+# para que se ejecte el CD/DVD.
+#
+#d-i cdrom-detect/eject boolean false
+#
+###############################################################################
+# POSTINSTALL - PREPARACION PARA LA FASE 2
+###############################################################################
+#
+# Los postinstall de aplicacion son leidos del directorio (si existe):
+# /mnt/src/OS/postinstall/apps/$servicio/$capa.sh
+#
+# El script $servicio generalmente es o un script que llama al instalador real
+# de la aplicacion en /mnt/src/APLICACION o un SYMLINK a un script en
+# /mnt/src/APLICACION.
+#
+# Existe un script de ejemplo en /mnt/src/OS/postinstall/apps/test/test.sh
+#
+d-i preseed/late_command string \
+	echo generico > /target/etc/servicio; \
+	echo generica > /target/etc/capa; \
+	echo "localhost.localdomain" > /target/etc/hostname; \
+	echo "openstack" > /target/etc/ubuntu-postinstall-location; \
+	echo "yes" > /target/etc/ubuntu-postinstall-reboot; \
+	echo "search cantv.net" > /target/etc/resolv.conf; \
+	echo "nameserver 192.168.1.1" >> /target/etc/resolv.conf; \
+#	wget -O /target/etc/postinstall.sh http://192.168.1.112/postinstall/DEBIAN6/postinstall.sh; \
+#	wget -O /target/etc/rc.local.postinstall http://192.168.1.112/postinstall/DEBIAN6/rc.local.postinstall; \
+#	chmod 755 /target/etc/postinstall.sh; \
+#	cat /target/etc/rc.local > /target/etc/rc.local.original; \
+#	cat /target/etc/rc.local.postinstall > /target/etc/rc.local; \
+	echo "run-postinstall" > /target/etc/run-ubuntu-postinstall; \
+	echo "LANGUAGE=\"en_US:en\"" >> /target/etc/default/locale; \
+	echo "LC_ALL=\"en_US.UTF-8\"" >> /target/etc/default/locale
+#
+# FIN DE LA PLANTILLA DESATENDIDA !!.
+#
+###############################################################################

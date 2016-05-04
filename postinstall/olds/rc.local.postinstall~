@@ -1,0 +1,86 @@
+#!/bin/sh
+#
+# NOTA: Esta version elimina el -e al final de bin sh
+# Luego el postinstall restituye el rc.local normal
+#
+# RC Local modificado para DEBIAN por SOPMID
+# Reynaldo Martinez P.
+# rmarti05@cantv.com.ve
+# Junio 2011
+#
+
+if [ -f /etc/run-ubuntu-postinstall ]; then
+	echo ""
+	echo ""
+	echo "****************************************************"
+	echo "****************************************************"
+	echo "****************************************************"
+	echo "** EJECUTANDO POSTINSTALL PARA UBUNTU **************"
+	echo "** El proceso puede tardar algunos minutos *********"
+	echo "** Espere a que termine y el servidor se reinicie **"
+	echo "** solo o devuelva un prompt !!! *******************"
+	echo "****************************************************"
+	echo "****************************************************"
+	echo "****************************************************"
+	echo ""
+	echo ""
+
+#        echo "Verificando disponibilidad del FILER"
+#	echo "por favor espere unos segundos..."
+#        filereachable=`/bin/ping -c2 10.128.5.64 2>/dev/null|/bin/grep -ic "100% packet loss" 2>/dev/null`
+#        case $filereachable in
+#        1)
+#		echo ""
+#                echo "El filer NO ESTA disponible - abortando postinstall"
+#		echo "Verifique si tiene problema de red y reinicie el servidor"
+#                exit 0
+#                ;;
+#        *)
+#		echo ""
+#                echo "Filer disponible - continuando instalacion"
+#                echo "Verifique la consola 6 (alt + F6) para observar"
+#		echo "el funcionamiento del postinstall"
+#		echo ""
+#                ;;
+#        esac
+
+	/etc/postinstall-ubuntu.sh 2>&1 | cat >> /var/log/postinstall-results.log
+
+fi
+
+
+# /sbin/ethtool -s eth0 speed 100 duplex full autoneg off
+# /sbin/ethtool -s eth1 speed 100 duplex full autoneg off
+
+#
+# Ejecuto el CPUSTAT - debe ser ejecutado
+# dos veces seguidas para actualizar correctamente
+# la variable de snmp
+#
+#if [ -f /usr/local/bin/cpustat ]; then
+#	/usr/local/bin/cpustat > /var/tmp/cpu-stat.txt
+#	/usr/local/bin/cpustat > /var/tmp/cpu-stat.txt
+#fi
+
+cp /etc/linux_logo.conf /etc/linux_logo.conf.ori
+sed -r -i "s/-L debian/-L ubuntu/" /etc/linux_logo.conf
+
+if [ -f /usr/bin/linuxlogo ]; then
+ cp /etc/issue /etc/issue.ori
+ echo "" > /etc/issue
+ /usr/bin/linuxlogo -t "$R" >> /etc/issue
+ cp /etc/issue /etc/issue.net.ori
+ /usr/bin/linuxlogo -a -t "$R" > /etc/issue.net
+ echo >> /etc/issue
+fi
+
+echo ""
+echo "Forzando sincronizacion con NTP"
+/usr/sbin/service ntp stop
+/usr/sbin/ntpdate-debian
+/usr/sbin/service ntp start
+echo "Listo.."
+echo ""
+
+
+exit 0
